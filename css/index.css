@@ -1,0 +1,21 @@
+.controller {
+  position: absolute;
+  width: 100%;
+  margin: auto;
+}
+
+.controller input[type="range"] {
+  transform: rotate(-90deg) scale(1.5);
+  margin-top: 80px;
+  background-color: rgb(235, 239, 244);
+  -webkit-appearance: none; 
+}
+
+.controller input[type="range"]::-webkit-slider-thumb { 
+  -webkit-appearance: none;
+  height: 50px;
+  width: 50px;
+  background: rgb(255, 255, 255);
+  border-radius: 15px;
+  border: 5px solid rgb(0, 110, 179);
+}
