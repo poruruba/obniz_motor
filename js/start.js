@@ -32,7 +32,6 @@ var vue_options = {
         qrcode_list: [],
         qrcode: '',
         counter: 0.0,
-        num_of_kill: 0,
         num_of_fail: 0,
         num_of_total: 0,
         shells: 0,
@@ -52,6 +51,16 @@ var vue_options = {
             fire.currentTime = 0;
             fire.play();
             if( this.lockon ){
+                if( this.qrcode.endsWith('.mp3') ){
+                    console.log("fail");
+                    this.num_of_fail++;
+                    setTimeout(() => {
+                        var audioElem = new Audio();
+                        audioElem.src = this.qrcode;
+                        audioElem.play();
+                    }, 500 );
+                    return;
+                }
                 this.qrcode_list.push(this.qrcode);
                 setTimeout(() => {
                     var bomb = $('#snd_bomb')[0];
@@ -64,6 +73,7 @@ var vue_options = {
         battle_start: function(){
             this.counter = TIMER_COUNT;
             this.shells = SHELL_COUNT;
+            this.num_of_fail = 0;
             this.qrcode_list = [];
             this.lockon = false;
             this.qrcode = null;
@@ -72,7 +82,7 @@ var vue_options = {
                 if( this.counter <= 0.0){
                     clearInterval(this.timer);
                     this.counter = 0.0;
-                    this.num_of_total = this.num_of_kill - this.num_of_fail * 3;
+                    this.num_of_total = this.qrcode_list.length - this.num_of_fail * 3;
                     if( this.num_of_total < 0)
                         this.num_of_total = 0;
                     alert('終了ーっ！！');
