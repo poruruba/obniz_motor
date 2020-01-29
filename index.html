@@ -28,6 +28,7 @@
 
     <script src="https://unpkg.com/obniz/obniz.js"></script>
     <link rel="stylesheet" href="./css/index.css" />
+    <script src="dist/js/jsQR.js"></script>
 </head>
 
 <body>
@@ -40,9 +41,6 @@
             <label>camera url</label>
             <input type="text" class="form-control" v-model="camera_url">
         </div>
-<!--
-        <button class="btn btn-default btn-block" v-on:click="motor_reset">Stop</button>
--->
 
         <div class="controller">
             <div class="control" style="float: left;">
@@ -54,8 +52,35 @@
                 <input id="motor_right" type="range" v-bind:min="power_min" v-bind:max="power_max" v-model.number="power_right" v-on:input="motor_change_right()" v-on:touchend="motor_end_right()"><br>
             </div>
         </div>
-        <img v-if="obniz_connected" v-bind:src="camera_url" style="margin:0 auto;" class="img-responsive">
+        <!--
+        <img v-show="obniz_connected" style="margin:0 auto;" class="img-responsive" id="camera_image" crossorigin="anonymous" v-on:load="camera_draw">
+        -->
+        <canvas v-show="obniz_connected" style="margin:0 auto;" class="img-responsive" id="camera_canvas"></canvas>
+        <div v-if="obniz_connected">
+            <button v-if="counter==0.0" class="btn btn-primary btn-lg center-block" v-on:click="battle_start">戦闘開始</button>
+            <button v-if="counter>0.0" class="btn btn-default btn-lg center-block" v-on:click="battle_fire">攻撃！！</button>
+            <div v-if="counter>0.0" class="text-center"><h2><small>残り</small> {{counter.toFixed(1)}} <small>s (弾数：{{shells}})</small></h2></div>
+        </div>
 
+        <div class="modal fade" id="result_dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        戦闘結果
+                        <span class="pull-right">
+                            <button class="btn btn-default btn-sm" v-on:click="dialog_close('#result_dialog')">閉じる</button>
+                        </span>
+                    </div>
+                    <div class="modal-body">
+                        <center>
+                            <h3>敵:{{qrcode_list.length}} 誤:{{num_of_fail}}</h3>
+                            <h1>今回の戦績： {{num_of_total}} <small>点</small></h1>
+                            <br>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>          
 
         <div class="modal fade" id="progress">
             <div class="modal-dialog">
@@ -71,6 +96,8 @@
         </div>        
     </div>
 
+    <audio src="./raw/bomb.mp3" id="snd_bomb" preload></audio>
+    <audio src="./raw/fire.mp3" id="snd_fire" preload></audio>
     <script src="js/start.js"></script>
 </body>
 </html>
