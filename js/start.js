@@ -82,6 +82,7 @@ var vue_options = {
                 if( this.counter <= 0.0){
                     clearInterval(this.timer);
                     this.counter = 0.0;
+                    this.motor_reset();
                     this.num_of_total = this.qrcode_list.length - this.num_of_fail * 3;
                     if( this.num_of_total < 0)
                         this.num_of_total = 0;
