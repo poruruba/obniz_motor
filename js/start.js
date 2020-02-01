@@ -30,7 +30,7 @@ var vue_options = {
         power_max: POWER_MAX + POWER_MARGIN,
         power_min: -(POWER_MAX + POWER_MARGIN),
         camera_ipaddress: '192.168.1.248',
-        camera_resolution: 6,
+        camera_resolution: 4,
         qrcode_context: null,
         qrcode_canvas: null,
         qrcode_list: [],
