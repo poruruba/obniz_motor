@@ -8,12 +8,15 @@ var motor_left;
 var power_left_sign;
 var power_right_sign;
 var camera_image;
+var button_pressed = false;
 
 const COOKIE_EXPIRE = 365;
 const POWER_MARGIN = 10;
 const POWER_MAX = 40;
 const TIMER_COUNT = 60.0;
 const SHELL_COUNT = 10;
+
+var gamepad = null;
 
 var vue_options = {
     el: "#top",
@@ -26,7 +29,8 @@ var vue_options = {
         power_right: 0,
         power_max: POWER_MAX + POWER_MARGIN,
         power_min: -(POWER_MAX + POWER_MARGIN),
-        camera_url: 'http://192.168.1.248:81/stream',
+        camera_ipaddress: '192.168.1.248',
+        camera_resolution: 6,
         qrcode_context: null,
         qrcode_canvas: null,
         qrcode_list: [],
@@ -61,6 +65,7 @@ var vue_options = {
                     }, 500 );
                     return;
                 }
+                
                 this.qrcode_list.push(this.qrcode);
                 setTimeout(() => {
                     var bomb = $('#snd_bomb')[0];
@@ -90,6 +95,34 @@ var vue_options = {
                     this.dialog_open('#result_dialog', true);
                 }
             }, 100);
+        },
+        check_gamepad: function(playing){
+            var gamepadList = navigator.getGamepads();
+            for(var i=0; i<gamepadList.length; i++){
+                var gamepad = gamepadList[i];
+                if(gamepad){
+                    if( playing ){
+                        this.power_right = Math.floor(-gamepad.axes[3] * this.power_max);
+                        this.power_left = Math.floor(-gamepad.axes[1] * this.power_max);
+                        this.motor_change_right();
+                        this.motor_change_left();
+
+                        if( !button_pressed && gamepad.buttons[0].pressed ){
+                            button_pressed = true;
+                            this.battle_fire();
+                        }else if( button_pressed && !gamepad.buttons[0].pressed ){
+                            button_pressed = false;
+                        }
+                    }else{
+                        if( gamepad.buttons[9].pressed )
+                            this.battle_start();
+                        if( gamepad.buttons[1].pressed )
+                            this.dialog_close('#result_dialog');
+                    }
+
+                    break;
+                }
+            }
         },
         camera_draw() {
             if(this.qrcode_canvas == null ){
@@ -129,8 +162,12 @@ var vue_options = {
                     this.lockon = false;
                     this.qrcode = null;
                 }
+
+                this.check_gamepad(true);
+            }else{
+                this.check_gamepad(false);
             }
-        
+
             requestAnimationFrame(this.camera_draw);
         },
         obniz_connect: function(){
@@ -146,10 +183,14 @@ var vue_options = {
                 motor_right = obniz.wired("DCMotor", {forward:2, back:3});
                 this.motor_reset();
 
-                camera_image = new Image();
-                camera_image.crossOrigin = "Anonymous";
-                camera_image.addEventListener("load", this.camera_draw, false);
-                camera_image.src = this.camera_url;
+                await do_get('http://' + this.camera_ipaddress + ':80/control', { var: 'framesize', val: this.camera_resolution });
+
+                setTimeout(() => {
+                    camera_image = new Image();
+                    camera_image.crossOrigin = "Anonymous";
+                    camera_image.addEventListener("load", this.camera_draw, false);
+                    camera_image.src = 'http://' + this.camera_ipaddress + ':81/stream';
+                }, 1000);
             }
         },
         motor_reset: function(){
@@ -235,3 +276,17 @@ var vue_options = {
 };
 vue_add_methods(vue_options, methods_utils);
 var vue = new Vue( vue_options );
+
+function do_get(url, qs) {
+    var params = new URLSearchParams(qs);
+    var url2 = new URL(url);
+    url2.search = params;
+  
+    return fetch(url2.toString(), {
+        method: 'GET',
+      })
+      .then((response) => {
+        if (!response.ok)
+          throw 'status is not 200';
+      });
+  }
