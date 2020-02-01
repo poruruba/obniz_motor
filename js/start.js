@@ -85,7 +85,7 @@ var vue_options = {
                     this.num_of_total = this.qrcode_list.length - this.num_of_fail * 3;
                     if( this.num_of_total < 0)
                         this.num_of_total = 0;
-                    alert('終了ーっ！！');
+//                    alert('終了ーっ！！');
                     this.dialog_open('#result_dialog', true);
                 }
             }, 100);
