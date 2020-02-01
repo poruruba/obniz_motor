@@ -142,15 +142,14 @@ var vue_options = {
                 Cookies.set('obniz_id', this.obniz_id, { expires: COOKIE_EXPIRE });
                 this.obniz_connected = true;
 
+                motor_left = obniz.wired("DCMotor", {forward:0, back:1});
+                motor_right = obniz.wired("DCMotor", {forward:2, back:3});
+                this.motor_reset();
+
                 camera_image = new Image();
                 camera_image.crossOrigin = "Anonymous";
                 camera_image.addEventListener("load", this.camera_draw, false);
                 camera_image.src = this.camera_url;
-
-                motor_left = obniz.wired("DCMotor", {forward:0, back:1});
-                motor_right = obniz.wired("DCMotor", {forward:2, back:3});
-
-                this.motor_reset();
             }
         },
         motor_reset: function(){
