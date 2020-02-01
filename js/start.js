@@ -16,8 +16,6 @@ const POWER_MAX = 40;
 const TIMER_COUNT = 60.0;
 const SHELL_COUNT = 10;
 
-var gamepad = null;
-
 var vue_options = {
     el: "#top",
     data: {
