@@ -179,8 +179,8 @@ var vue_options = {
                         }else if( this.qrcode.toLowerCase().endsWith('.mp3') ){
                             if( this.audio == null ){
                                 this.audio = new Audio();
-                                this.audio.src = this.qrcode;
                                 this.audio.addEventListener("ended", () => this.audio = null, false);
+                                this.audio.src = this.qrcode;
                                 this.audio.play();
                             }
                         }
