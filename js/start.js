@@ -344,7 +344,9 @@ function drawTexture(g, img, plsttx){
         g.clip();
         g.setTransform(m11, m12, m21, m22, dx, dy);
         g.drawImage(img, 0, 0);
-    }finally{
+        g.restore();
+    }catch(error){
+        console.log(error);
         g.restore();
     }
 }
