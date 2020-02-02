@@ -9,7 +9,6 @@ var power_left_sign;
 var power_right_sign;
 var camera_image;
 var button_pressed = false;
-var enemy_list = new Map();
 
 const COOKIE_EXPIRE = 365;
 const POWER_MARGIN = 10;
@@ -33,6 +32,8 @@ var vue_options = {
         qrcode_context: null,
         qrcode_canvas: null,
         qrcode_list: [],
+        enemy_list: new Map(),
+        enemy_image: [],
         qrcode: '',
         counter: 0.0,
         num_of_fail: 0,
@@ -66,6 +67,9 @@ var vue_options = {
                 }
                 
                 this.qrcode_list.push(this.qrcode);
+                var img = this.enemy_list.get(this.qrcode);
+                if( img )
+                    img.count++;
                 setTimeout(() => {
                     var bomb = $('#snd_bomb')[0];
                     bomb.pause();
@@ -79,6 +83,8 @@ var vue_options = {
             this.shells = SHELL_COUNT;
             this.num_of_fail = 0;
             this.qrcode_list = [];
+            this.enemy_image = [];
+            this.enemy_list.forEach(item => item.count = 0);
             this.lockon = false;
             this.qrcode = null;
             this.timer = setInterval(() =>{
@@ -87,11 +93,16 @@ var vue_options = {
                     clearInterval(this.timer);
                     this.counter = 0.0;
                     this.motor_reset();
+
                     this.num_of_total = this.qrcode_list.length - this.num_of_fail * 3;
                     if( this.num_of_total < 0)
                         this.num_of_total = 0;
 //                    alert('終了ーっ！！');
-                    this.dialog_open('#result_dialog', true);
+                    this.enemy_list.forEach((item, key) => {
+                        if( item.count > 0 )
+                            this.enemy_image.push(key);
+                    });
+                   this.dialog_open('#result_dialog', true);
                 }
             }, 100);
         },
@@ -148,14 +159,15 @@ var vue_options = {
                         var pos = code.location;
 
                         if( this.qrcode.toLowerCase().endsWith('.png') ){
-                            var img = enemy_list.get(this.qrcode);
+                            var img = this.enemy_list.get(this.qrcode);
                             if( !img ){
-                                img = new Image();
-                                img.crossOrigin = "Anonymous";
-                                img.src = this.qrcode;
-                                enemy_list.set(this.qrcode, img);
+                                var image = new Image();
+                                image.crossOrigin = "Anonymous";
+                                image.src = this.qrcode;
+                                img = { image: image, count: 0 };
+                                this.enemy_list.set(this.qrcode, img );
                             };
-                            drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
+                            drawTexture(this.qrcode_context, img.image, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
                         }else{
 	                        this.qrcode_context.beginPath();
 	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
@@ -307,18 +319,19 @@ function do_get(url, qs) {
 }
 
 function drawTexture(g, img, plsttx){
-    var imgw = img.width;
-    var imgh = img.height;
-
-    var m11 = (plsttx[1].x - plsttx[0].x) / imgw;
-    var m12 = (plsttx[1].y - plsttx[0].y) / imgw;
-    var m21 = (plsttx[3].x - plsttx[0].x) / imgh;
-    var m22 = (plsttx[3].y - plsttx[0].y) / imgh;
-    var dx = plsttx[0].x;
-    var dy = plsttx[0].y;
-
     try{
         g.save();
+
+        var imgw = img.width;
+        var imgh = img.height;
+
+        var m11 = (plsttx[1].x - plsttx[0].x) / imgw;
+        var m12 = (plsttx[1].y - plsttx[0].y) / imgw;
+        var m21 = (plsttx[3].x - plsttx[0].x) / imgh;
+        var m22 = (plsttx[3].y - plsttx[0].y) / imgh;
+        var dx = plsttx[0].x;
+        var dy = plsttx[0].y;
+
         g.beginPath();
         g.moveTo(plsttx[0].x, plsttx[0].y);
         g.lineTo(plsttx[1].x, plsttx[1].y);
