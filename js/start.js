@@ -151,6 +151,7 @@ var vue_options = {
                             var img = enemy_list.get(this.qrcode);
                             if( !img ){
                                 img = new Image();
+                                img.crossOrigin = "Anonymous";
                                 img.src = this.qrcode;
                                 enemy_list.set(this.qrcode, img);
                             };
