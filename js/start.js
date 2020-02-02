@@ -158,6 +158,13 @@ var vue_options = {
                         this.lockon = true;
 
                         var pos = code.location;
+                        this.qrcode_context.beginPath();
+                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
+                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
+                        this.qrcode_context.lineTo(pos.bottomRightCorner.x, pos.bottomRightCorner.y);
+                        this.qrcode_context.lineTo(pos.bottomLeftCorner.x, pos.bottomLeftCorner.y);
+                        this.qrcode_context.lineTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
+                        this.qrcode_context.stroke();
 
                         if( this.qrcode.toLowerCase().endsWith('.png') ){
                             var img = this.enemy_list.get(this.qrcode);
@@ -176,14 +183,6 @@ var vue_options = {
                                 this.audio.addEventListener("ended", () => this.audio = null, false);
                                 this.audio.play();
                             }
-                        }else{
-	                        this.qrcode_context.beginPath();
-	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
-	                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
-	                        this.qrcode_context.lineTo(pos.bottomRightCorner.x, pos.bottomRightCorner.y);
-	                        this.qrcode_context.lineTo(pos.bottomLeftCorner.x, pos.bottomLeftCorner.y);
-	                        this.qrcode_context.lineTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
-	                        this.qrcode_context.stroke();
                         }
                     }else{
                         this.lockon = false;
