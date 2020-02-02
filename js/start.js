@@ -54,7 +54,7 @@ var vue_options = {
             fire.currentTime = 0;
             fire.play();
             if( this.lockon ){
-                if( this.qrcode.endsWith('.mp3') ){
+                if( this.qrcode.toLowwerCase().endsWith('.mp3') ){
                     console.log("fail");
                     this.num_of_fail++;
                     setTimeout(() => {
@@ -147,7 +147,7 @@ var vue_options = {
 
                         var pos = code.location;
 
-                        if( this.qrcode.endsWith('.png') ){
+                        if( this.qrcode.toLowwerCase().endsWith('.png') ){
                             var img = enemy_list.get(this.qrcode);
                             if( !img ){
                                 img = new Image();
@@ -193,7 +193,11 @@ var vue_options = {
                 motor_right = obniz.wired("DCMotor", {forward:2, back:3});
                 this.motor_reset();
 
-                await do_get('http://' + this.camera_ipaddress + ':80/control', { var: 'framesize', val: this.camera_resolution });
+                try{
+                    await do_get('http://' + this.camera_ipaddress + ':80/control', { var: 'framesize', val: this.camera_resolution });
+                }catch(error){
+                    alert(error);
+                }
 
                 setTimeout(() => {
                     camera_image = new Image();
