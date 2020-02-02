@@ -54,7 +54,7 @@ var vue_options = {
             fire.currentTime = 0;
             fire.play();
             if( this.lockon ){
-                if( this.qrcode.toLowwerCase().endsWith('.mp3') ){
+                if( this.qrcode.toLowerCase().endsWith('.mp3') ){
                     console.log("fail");
                     this.num_of_fail++;
                     setTimeout(() => {
@@ -147,7 +147,7 @@ var vue_options = {
 
                         var pos = code.location;
 
-                        if( this.qrcode.toLowwerCase().endsWith('.png') ){
+                        if( this.qrcode.toLowerCase().endsWith('.png') ){
                             var img = enemy_list.get(this.qrcode);
                             if( !img ){
                                 img = new Image();
