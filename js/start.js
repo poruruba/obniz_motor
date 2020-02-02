@@ -9,6 +9,7 @@ var power_left_sign;
 var power_right_sign;
 var camera_image;
 var button_pressed = false;
+var enemy_list = new Map();
 
 const COOKIE_EXPIRE = 365;
 const POWER_MARGIN = 10;
@@ -145,13 +146,24 @@ var vue_options = {
                         this.lockon = true;
 
                         var pos = code.location;
-                        this.qrcode_context.beginPath();
-                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
-                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
-                        this.qrcode_context.lineTo(pos.bottomRightCorner.x, pos.bottomRightCorner.y);
-                        this.qrcode_context.lineTo(pos.bottomLeftCorner.x, pos.bottomLeftCorner.y);
-                        this.qrcode_context.lineTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
-                        this.qrcode_context.stroke();
+
+                        if( this.qrcode.endsWith('.png') ){
+                            var img = enemy_list.get(this.qrcode);
+                            if( !img ){
+                                img = new Image();
+                                img.src = this.qrcode;
+                                enemy_list.set(this.qrcode, img);
+                            };
+                            drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
+                        }else{
+	                        this.qrcode_context.beginPath();
+	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
+	                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
+	                        this.qrcode_context.lineTo(pos.bottomRightCorner.x, pos.bottomRightCorner.y);
+	                        this.qrcode_context.lineTo(pos.bottomLeftCorner.x, pos.bottomLeftCorner.y);
+	                        this.qrcode_context.lineTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
+	                        this.qrcode_context.stroke();
+                        }
                     }else{
                         this.lockon = false;
                         this.qrcode = null;
@@ -281,10 +293,51 @@ function do_get(url, qs) {
     url2.search = params;
   
     return fetch(url2.toString(), {
-        method: 'GET',
-      })
-      .then((response) => {
-        if (!response.ok)
-          throw 'status is not 200';
-      });
-  }
+		method: 'GET',
+	})
+	.then((response) => {
+		if (!response.ok)
+			throw 'status is not 200';
+	});
+}
+
+function drawTexture(g, img, plsttx){
+    var imgw = img.width;
+    var imgh = img.height;
+
+    var m11 = (plsttx[1].x - plsttx[0].x) / imgw;
+    var m12 = (plsttx[1].y - plsttx[0].y) / imgw;
+    var m21 = (plsttx[3].x - plsttx[0].x) / imgh;
+    var m22 = (plsttx[3].y - plsttx[0].y) / imgh;
+    var dx = plsttx[0].x;
+    var dy = plsttx[0].y;
+
+    g.save();
+    g.beginPath();
+    g.moveTo(plsttx[0].x, plsttx[0].y);
+    g.lineTo(plsttx[1].x, plsttx[1].y);
+    g.lineTo(plsttx[3].x, plsttx[3].y);
+    g.closePath();
+    g.clip();
+    g.setTransform(m11, m12, m21, m22, dx, dy);
+    g.drawImage(img, 0, 0);
+    g.restore();
+
+    m11 = (plsttx[2].x - plsttx[3].x) / imgw;
+    m12 = (plsttx[2].y - plsttx[3].y) / imgw;
+    m21 = (plsttx[2].x - plsttx[1].x) / imgh;
+    m22 = (plsttx[2].y - plsttx[1].y) / imgh;
+    dx = plsttx[1].x - imgw * m11;
+    dy = plsttx[3].y - imgh * m22;
+
+    g.save();
+    g.beginPath();
+    g.moveTo(plsttx[1].x, plsttx[1].y);
+    g.lineTo(plsttx[2].x, plsttx[2].y);
+    g.lineTo(plsttx[3].x, plsttx[3].y);
+    g.closePath();
+    g.clip();
+    g.setTransform(m11, m12, m21, m22, dx, dy);
+    g.drawImage(img, 0, 0);
+    g.restore();
+}
