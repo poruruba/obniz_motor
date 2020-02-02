@@ -40,6 +40,7 @@ var vue_options = {
         num_of_total: 0,
         shells: 0,
         lockon: false,
+        audio: null,
     },
     computed: {
     },
@@ -168,6 +169,13 @@ var vue_options = {
                                 this.enemy_list.set(this.qrcode, img );
                             };
                             drawTexture(this.qrcode_context, img.image, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
+                        }else if( this.qrcode.toLowerCase().endsWith('.mp3') ){
+                            if( this.audio == null ){
+                                this.audio = new Audio();
+                                this.audio.src = this.qrcode;
+                                this.audio.addEventListener("ended", () => this.audio = null, false);
+                                this.audio.play();
+                            }
                         }else{
 	                        this.qrcode_context.beginPath();
 	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
