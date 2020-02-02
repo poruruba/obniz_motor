@@ -154,8 +154,12 @@ var vue_options = {
                                 img.src = this.qrcode;
                                 enemy_list.set(this.qrcode, img);
                             };
-                            drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
-                        }else{
+                            try{
+                                drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
+                            }catch(error){
+                                console.log(error);
+                            }
+			}else{
 	                        this.qrcode_context.beginPath();
 	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
 	                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
