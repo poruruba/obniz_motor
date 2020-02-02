@@ -154,12 +154,8 @@ var vue_options = {
                                 img.src = this.qrcode;
                                 enemy_list.set(this.qrcode, img);
                             };
-                            try{
-                                drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
-                            }catch(error){
-                                console.log(error);
-                            }
-			}else{
+                            drawTexture(this.qrcode_context, img, [pos.topLeftCorner, pos.topRightCorner, pos.bottomRightCorner, pos.bottomLeftCorner]);
+                        }else{
 	                        this.qrcode_context.beginPath();
 	                        this.qrcode_context.moveTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
 	                        this.qrcode_context.lineTo(pos.topRightCorner.x, pos.topRightCorner.y);
@@ -320,32 +316,35 @@ function drawTexture(g, img, plsttx){
     var dx = plsttx[0].x;
     var dy = plsttx[0].y;
 
-    g.save();
-    g.beginPath();
-    g.moveTo(plsttx[0].x, plsttx[0].y);
-    g.lineTo(plsttx[1].x, plsttx[1].y);
-    g.lineTo(plsttx[3].x, plsttx[3].y);
-    g.closePath();
-    g.clip();
-    g.setTransform(m11, m12, m21, m22, dx, dy);
-    g.drawImage(img, 0, 0);
-    g.restore();
-
-    m11 = (plsttx[2].x - plsttx[3].x) / imgw;
-    m12 = (plsttx[2].y - plsttx[3].y) / imgw;
-    m21 = (plsttx[2].x - plsttx[1].x) / imgh;
-    m22 = (plsttx[2].y - plsttx[1].y) / imgh;
-    dx = plsttx[1].x - imgw * m11;
-    dy = plsttx[3].y - imgh * m22;
-
-    g.save();
-    g.beginPath();
-    g.moveTo(plsttx[1].x, plsttx[1].y);
-    g.lineTo(plsttx[2].x, plsttx[2].y);
-    g.lineTo(plsttx[3].x, plsttx[3].y);
-    g.closePath();
-    g.clip();
-    g.setTransform(m11, m12, m21, m22, dx, dy);
-    g.drawImage(img, 0, 0);
-    g.restore();
+    try{
+        g.save();
+        g.beginPath();
+        g.moveTo(plsttx[0].x, plsttx[0].y);
+        g.lineTo(plsttx[1].x, plsttx[1].y);
+        g.lineTo(plsttx[3].x, plsttx[3].y);
+        g.closePath();
+        g.clip();
+        g.setTransform(m11, m12, m21, m22, dx, dy);
+        g.drawImage(img, 0, 0);
+        g.restore();
+    
+        m11 = (plsttx[2].x - plsttx[3].x) / imgw;
+        m12 = (plsttx[2].y - plsttx[3].y) / imgw;
+        m21 = (plsttx[2].x - plsttx[1].x) / imgh;
+        m22 = (plsttx[2].y - plsttx[1].y) / imgh;
+        dx = plsttx[1].x - imgw * m11;
+        dy = plsttx[3].y - imgh * m22;
+    
+        g.save();
+        g.beginPath();
+        g.moveTo(plsttx[1].x, plsttx[1].y);
+        g.lineTo(plsttx[2].x, plsttx[2].y);
+        g.lineTo(plsttx[3].x, plsttx[3].y);
+        g.closePath();
+        g.clip();
+        g.setTransform(m11, m12, m21, m22, dx, dy);
+        g.drawImage(img, 0, 0);
+    }finally{
+        g.restore();
+    }
 }
