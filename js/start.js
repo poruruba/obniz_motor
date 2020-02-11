@@ -15,6 +15,7 @@ const POWER_MARGIN = 10;
 const POWER_MAX = 40;
 const TIMER_COUNT = 60.0;
 const SHELL_COUNT = 10;
+const AIMING_DURATION = 0.2;
 
 var vue_options = {
     el: "#top",
@@ -41,6 +42,10 @@ var vue_options = {
         shells: 0,
         lockon: false,
         audio: null,
+        rest_counter : 0,
+        aiming_x: 0,
+        aiming_y: 0,
+        direction: {},
     },
     computed: {
     },
@@ -78,16 +83,23 @@ var vue_options = {
                     bomb.play();
                 }, 700 );
             }
+            if( this.shells <= 0 ){
+	            this.counter = 0;
+	        }
         },
         battle_start: function(){
             this.counter = TIMER_COUNT;
             this.shells = SHELL_COUNT;
             this.num_of_fail = 0;
+            this.direction = {},
+            this.aiming_x = 0;
+            this.aiming_y = 0;
             this.qrcode_list = [];
             this.enemy_image = [];
             this.enemy_list.forEach(item => item.count = 0);
             this.lockon = false;
             this.qrcode = null;
+            this.rest_counter = 0;
             this.timer = setInterval(() =>{
                 this.counter -= 0.1;
                 if( this.counter <= 0.0){
@@ -107,6 +119,51 @@ var vue_options = {
                 }
             }, 100);
         },
+        check_direction: function(gamepad){
+            var direction = {};
+            if( !this.direction.prev ){
+                this.direction.prev = performance.now();
+                return direction;
+            }
+            var now = performance.now();
+            direction.diff = now - this.direction.prev;
+            this.direction.prev = now;
+
+            if( gamepad.buttons[12].pressed ){
+                if( this.direction.up )
+                    direction.up = true;
+                else
+                    this.direction.up = true;
+            }else{
+                this.direction.up = false;
+            }
+            if( gamepad.buttons[13].pressed ){
+                if( this.direction.down )
+                    direction.down = true;
+                else
+                    this.direction.down = true;
+            }else{
+                this.direction.down = false;
+            }
+            if( gamepad.buttons[14].pressed ){
+                if( this.direction.left )
+                    direction.left = true;
+                else
+                    this.direction.left = true;
+            }else{
+                this.direction.left = false;
+            }
+            if( gamepad.buttons[15].pressed ){
+                if( this.direction.right )
+                    direction.right = true;
+                else
+                    this.direction.right = true;
+            }else{
+                this.direction.right = false;
+            }
+
+            return direction;
+        },
         check_gamepad: function(playing){
             var gamepadList = navigator.getGamepads();
             for(var i=0; i<gamepadList.length; i++){
@@ -124,6 +181,31 @@ var vue_options = {
                         }else if( button_pressed && !gamepad.buttons[0].pressed ){
                             button_pressed = false;
                         }
+
+                        var direction = this.check_direction(gamepad);
+//                        console.log(direction);
+                        if( direction.up )
+                            this.aiming_y -= direction.diff * AIMING_DURATION;
+                        if( direction.down )
+                            this.aiming_y += direction.diff * AIMING_DURATION;
+                        if( direction.left )
+                            this.aiming_x -= direction.diff * AIMING_DURATION;
+                        if( direction.right )
+                            this.aiming_x += direction.diff * AIMING_DURATION;
+
+                        if( this.aiming_x > this.qrcode_canvas.width)
+                            this.aiming_x = this.qrcode_canvas.width;
+                        else if( this.aiming_x < 0 )
+                            this.aiming_x = 0;
+                        if( this.aiming_y > this.qrcode_canvas.height)
+                            this.aiming_y = this.qrcode_canvas.height;
+                        else if( this.aiming_y < 0 )
+                            this.aiming_y = 0;
+
+                        this.qrcode_context.beginPath();
+                        this.qrcode_context.arc(this.aiming_x, this.aiming_y, 10, 0 * Math.PI / 180, 360 * Math.PI / 180);
+                        this.qrcode_context.closePath();
+                        this.qrcode_context.stroke();
                     }else{
                         if( gamepad.buttons[9].pressed )
                             this.battle_start();
@@ -155,7 +237,6 @@ var vue_options = {
                     console.log(code);
                     if( this.qrcode_list.indexOf(code.data) < 0){
                         this.qrcode = code.data;
-                        this.lockon = true;
 
                         var pos = code.location;
                         this.qrcode_context.beginPath();
@@ -164,7 +245,13 @@ var vue_options = {
                         this.qrcode_context.lineTo(pos.bottomRightCorner.x, pos.bottomRightCorner.y);
                         this.qrcode_context.lineTo(pos.bottomLeftCorner.x, pos.bottomLeftCorner.y);
                         this.qrcode_context.lineTo(pos.topLeftCorner.x, pos.topLeftCorner.y);
-                        this.qrcode_context.stroke();
+                        this.qrcode_context.closePath();
+                        if( this.qrcode_context.isPointInPath(this.aiming_x, this.aiming_y) ){
+                            this.lockon = true;
+                            this.qrcode_context.stroke();
+                        }else{
+                            this.lockon = false;
+                        }
 
                         if( this.qrcode.toLowerCase().endsWith('.png') ){
                             var img = this.enemy_list.get(this.qrcode);
@@ -222,7 +309,8 @@ var vue_options = {
                 setTimeout(() => {
                     camera_image = new Image();
                     camera_image.crossOrigin = "Anonymous";
-                    camera_image.addEventListener("load", this.camera_draw, false);
+//                    camera_image.addEventListener("load", this.camera_draw, false);
+                    camera_image.onload = this.camera_draw;
                     camera_image.src = 'http://' + this.camera_ipaddress + ':81/stream';
                 }, 1000);
             }
